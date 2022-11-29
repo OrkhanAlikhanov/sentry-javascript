@@ -1,6 +1,7 @@
 import replace from '@rollup/plugin-replace';
 import typescript from '@rollup/plugin-typescript';
 import { defineConfig } from 'rollup';
+import resolve from '@rollup/plugin-node-resolve';
 
 import pkg from '../package.json';
 
@@ -24,6 +25,7 @@ const config = defineConfig({
     typescript({
       tsconfig: './tsconfig.json',
     }),
+    resolve(),
     replace({
       // __SENTRY_DEBUG__ should be save to replace in any case, so no checks for assignments necessary
       preventAssignment: false,
