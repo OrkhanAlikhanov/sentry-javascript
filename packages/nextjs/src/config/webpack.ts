@@ -492,15 +492,15 @@ export function getWebpackPluginOptions(
   userPluginOptions: Partial<SentryWebpackPluginOptions>,
   userSentryOptions: UserSentryOptions,
 ): SentryWebpackPluginOptions {
-  const { buildId, isServer, webpack, config, dev: isDev, dir: projectDir } = buildContext;
-  const userNextConfig = config as NextConfigObject;
+  const { buildId, isServer, webpack, config: userNextConfig, dev: isDev, dir: projectDir } = buildContext;
+  const { distDir = '.next', target, basePath = '' } = userNextConfig as NextConfigObject;
 
-  const distDirAbsPath = path.resolve(projectDir, userNextConfig.distDir || '.next'); // `.next` is the default directory
+  const distDirAbsPath = path.resolve(projectDir, distDir);
 
   const isWebpack5 = webpack.version.startsWith('5');
-  const isServerless = userNextConfig.target === 'experimental-serverless-trace';
+  const isServerless = target === 'experimental-serverless-trace';
   const hasSentryProperties = fs.existsSync(path.resolve(projectDir, 'sentry.properties'));
-  const urlPrefix = userNextConfig.basePath ? `~${userNextConfig.basePath}/_next` : '~/_next';
+  const urlPrefix = path.join('~', basePath, '_next');
 
   const serverInclude = isServerless
     ? [{ paths: [`${distDirAbsPath}/serverless/`], urlPrefix: `${urlPrefix}/serverless` }]
