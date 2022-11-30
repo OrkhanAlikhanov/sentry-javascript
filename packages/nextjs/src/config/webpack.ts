@@ -493,14 +493,22 @@ export function getWebpackPluginOptions(
   userSentryOptions: UserSentryOptions,
 ): SentryWebpackPluginOptions {
   const { buildId, isServer, webpack, config: userNextConfig, dev: isDev, dir: projectDir } = buildContext;
-  const { distDir = '.next', target, basePath = '' } = userNextConfig as NextConfigObject;
+  const {
+    distDir = '.next',
+    target,
+    basePath = '/',
+    // We're only interested in the path part of this URL, but the `URL` constructor gets mad if you don't give it a
+    // full URL to work with, so we fake it in order to end up with something equivalent to `/`.
+    assetPrefix: fullAssetPrefix = 'http://dogs.are.great',
+  } = userNextConfig as NextConfigObject;
 
   const distDirAbsPath = path.resolve(projectDir, distDir);
+  const assetPrefixPath = new URL(fullAssetPrefix).pathname;
 
   const isWebpack5 = webpack.version.startsWith('5');
   const isServerless = target === 'experimental-serverless-trace';
   const hasSentryProperties = fs.existsSync(path.resolve(projectDir, 'sentry.properties'));
-  const urlPrefix = path.join('~', basePath, '_next');
+  const urlPrefix = isServer ? path.join('~', basePath, '_next') : path.join('~', assetPrefixPath, basePath, '_next');
 
   const serverInclude = isServerless
     ? [{ paths: [`${distDirAbsPath}/serverless/`], urlPrefix: `${urlPrefix}/serverless` }]
